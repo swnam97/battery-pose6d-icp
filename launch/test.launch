@@ -1,0 +1,53 @@
+<launch>
+
+    <!-- Wait for Gazebo spawn service -->
+    <node name="wait_for_gazebo_services" pkg="rel_pose_estimator" type="wait_for_gazebo_services.py" output="screen"/>
+
+    <!-- Set TurtleBot3 model argument -->
+    <arg name="model" default="waffle" doc="model type [burger, waffle, waffle_pi]"/>
+    <arg name="x_pos" default="-0.2"/>
+    <arg name="y_pos" default="-0.7"/>
+    <arg name="z_pos" default="0.0"/>
+    <arg name="yaw" default="0.78"/>
+
+    <!-- World file inclusion -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <!-- <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_world.world"/> -->
+        <arg name="world_name" value="$(find rel_pose_estimator)/worlds/test.world"/>
+        <arg name="paused" value="false"/>
+        <arg name="use_sim_time" value="true"/>
+        <arg name="gui" value="true"/>
+        <arg name="headless" value="false"/>
+        <arg name="debug" value="false"/>
+    </include>
+
+    <!-- Robot description parameter -->
+    <param name="robot_description" command="$(find xacro)/xacro --inorder $(find turtlebot3_description)/urdf/sw_turtlebot3_$(arg model).urdf.xacro" />
+
+    <!-- Robot State Publisher to publish TFs based on URDF -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen" />
+
+    <!-- Spawn the robot -->
+    <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf"  args="-urdf -model turtlebot3_$(arg model) -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) -Y $(arg yaw) -param robot_description" />
+
+    <!-- Target Extraction -->
+    <node pkg="rel_pose_estimator" type="target_extraction" name="target_extraction"  output="screen" />
+
+    <!-- ICP -->
+    <node pkg="rel_pose_estimator" type="pcl_icp" name="pcl_icp"  output="screen" />
+
+    <!-- Static Transform Publisher: Set fixed transform between odom and map -->
+    <node pkg="tf" type="static_transform_publisher" name="odom_to_map_broadcaster" 
+          args="0 0 0 0 0 0 odom map 100" />
+
+    <!-- Static Transform Publisher: battery_pack frame in odom -->
+    <node pkg="tf" type="static_transform_publisher" name="battery_pack_static_broadcaster" 
+            args="-0.1051 -0.6924 0.7498 0 0 0 map battery_pack_frame 100" />
+
+    <!-- Battery to Camera pack transform-->
+    <node pkg="rel_pose_estimator" type="gt_battery_to_cam_transform.py" name="battery_to_camera_frame" output="screen" />
+
+    <!-- Launch RViz with pitin_sim.rviz configuration -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rel_pose_estimator)/rviz/pitin_sim.rviz" output="screen" />
+
+</launch>
