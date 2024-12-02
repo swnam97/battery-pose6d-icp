@@ -1,7 +1,3 @@
-Here’s the updated **README** file including the images for Gazebo and RViz:
-
----
-
 # Battery Pack - Relative Pose Estimator
 
 This repository contains all the files and scripts used for estimating relative pose between objects using point cloud processing and ICP (Iterative Closest Point) techniques. It also includes files for handling object-to-point cloud conversions and point cloud visualization.
