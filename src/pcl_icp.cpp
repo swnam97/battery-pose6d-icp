@@ -47,6 +47,7 @@ private:
         if (first_callback_)
         {
             initial_transform_ = Eigen::Matrix4f::Identity();
+            //// Position (Ground Truth) ////
             // initial_transform_(0, 3) = -0.0254;
             // initial_transform_(1, 3) = -0.0046;
             // initial_transform_(2, 3) = -0.6420;
@@ -55,6 +56,7 @@ private:
             initial_transform_(2, 3) = -0.5420;
 
             // Example quaternion values to extract yaw
+            //// Orientation (Ground Truth) ////
             // float qx = -0.0016201, qy = 0.0002435, qz = -0.3849002, qw = 0.92295673;
             float qx = 0.0, qy = 0.0, qz = 0.25882, qw = 0.96593;
             double roll, pitch, yaw;
